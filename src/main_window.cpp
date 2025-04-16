@@ -432,7 +432,7 @@ void MainWindow::rcloneGetVersion() {
           };
 #endif
 
-          QStringList lines = version.split("\n", QString::SkipEmptyParts);
+          QStringList lines = version.split('\n', Qt::SkipEmptyParts);
           QString rclone_info2;
           QString rclone_info3;
 
@@ -789,7 +789,7 @@ void MainWindow::rcloneListRemotes() {
           QStyle *style = qApp->style();
 
           QString bytes = p->readAllStandardOutput().trimmed();
-          QStringList items = bytes.split('\n');
+          QStringList items = bytes.split('\n', Qt::SkipEmptyParts);
 
           auto settings = GetSettings();
           bool darkModeIni = settings->value("Settings/darkModeIni").toBool();
@@ -800,7 +800,7 @@ void MainWindow::rcloneListRemotes() {
               continue;
             }
 
-            QStringList parts = line.split(':');
+            QStringList parts = line.split(':', Qt::SkipEmptyParts);
             if (parts.count() != 2) {
               continue;
             }
@@ -1154,7 +1154,7 @@ void MainWindow::addMount(const QString &remote, const QString &folder) {
 
   args.append(GetRcloneConf());
   if (!opt.isEmpty()) {
-    args.append(opt.split(' '));
+    args.append(opt.split(' ', Qt::SkipEmptyParts));
   }
   args << remote << folder;
 
@@ -1214,7 +1214,10 @@ void MainWindow::addStream(const QString &remote, const QString &stream) {
   ui.jobs->insertWidget(1, line);
   ui.tabs->setTabText(1, QString("Jobs (%1)").arg(++mJobCount));
 
-  player->start(stream, QProcess::ReadOnly);
+  QStringList streamParts = stream.split(' ');
+  QString program = streamParts.takeFirst(); // Extract the program name
+  player->start(program, streamParts, QIODevice::ReadOnly);
+
   UseRclonePassword(rclone);
   rclone->start(GetRclone(),
                 QStringList() << "cat" << GetRcloneConf() << remote,
